@@ -8,7 +8,7 @@
     "build": "node ./build.mjs",
     "start": "node --enable-source-maps ./dist/index.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "vercel:build": "node ./build-vercel.mjs && pnpm -w --filter @workspace/stremio-piratebay-ui run vercel:build"
+    "vercel:build": "node ./build-vercel.mjs && OUT_DIR=$(pwd)/public pnpm -w --filter @workspace/stremio-piratebay-ui run vercel:build"
   },
   "dependencies": {
     "@workspace/api-zod": "workspace:*",
