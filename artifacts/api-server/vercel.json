@@ -1,0 +1,35 @@
+{
+  "version": 2,
+  "buildCommand": "pnpm vercel:build",
+  "outputDirectory": "../stremio-piratebay-ui/dist/public",
+  "installCommand": "pnpm install",
+  "rewrites": [
+    { "source": "/api/:path*", "destination": "/api/server" },
+    { "source": "/stremio/:path*", "destination": "/api/server" },
+    { "source": "/stremio-plus/:path*", "destination": "/api/server" },
+    { "source": "/stremio-adult/:path*", "destination": "/api/server" }
+  ],
+  "headers": [
+    {
+      "source": "/stremio/(.*)",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Access-Control-Allow-Headers", "value": "*" }
+      ]
+    },
+    {
+      "source": "/stremio-plus/(.*)",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Access-Control-Allow-Headers", "value": "*" }
+      ]
+    },
+    {
+      "source": "/stremio-adult/(.*)",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Access-Control-Allow-Headers", "value": "*" }
+      ]
+    }
+  ]
+}

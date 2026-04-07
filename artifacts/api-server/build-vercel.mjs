@@ -14,14 +14,14 @@ import { rm, mkdir } from "node:fs/promises";
 globalThis.require = createRequire(import.meta.url);
 
 const artifactDir = path.dirname(fileURLToPath(import.meta.url));
-const outDir = path.resolve(artifactDir, "../../api/dist");
+const outDir = path.resolve(artifactDir, "./dist");
 
 async function buildVercel() {
   await rm(outDir, { recursive: true, force: true });
   await mkdir(outDir, { recursive: true });
 
   await esbuild({
-    entryPoints: [path.resolve(artifactDir, "src/vercel.ts")],
+    entryPoints: [path.resolve(artifactDir, "src/server.ts")],
     platform: "node",
     bundle: true,
     format: "esm",
@@ -61,7 +61,7 @@ globalThis.__dirname = __bannerPath.dirname(globalThis.__filename);
     },
   });
 
-  console.log("Vercel API build complete → api/dist/server.mjs");
+  console.log("Vercel API build complete → artifacts/api-server/dist/server.mjs");
 }
 
 buildVercel().catch(err => {

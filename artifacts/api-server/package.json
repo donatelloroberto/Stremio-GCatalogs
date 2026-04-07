@@ -7,7 +7,8 @@
     "dev": "export NODE_ENV=development && pnpm run build && pnpm run start",
     "build": "node ./build.mjs",
     "start": "node --enable-source-maps ./dist/index.mjs",
-    "typecheck": "tsc -p tsconfig.json --noEmit"
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "vercel:build": "node ./build-vercel.mjs && pnpm -w --filter @workspace/stremio-piratebay-ui run vercel:build"
   },
   "dependencies": {
     "@workspace/api-zod": "workspace:*",
