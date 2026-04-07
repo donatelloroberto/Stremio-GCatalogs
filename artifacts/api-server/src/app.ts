@@ -1,7 +1,7 @@
 import express, { type Express } from "express";
 import cors from "cors";
 import pinoHttp from "pino-http";
-import router, { stremioRouter, stremioPlusRouter } from "./routes";
+import router, { stremioRouter, stremioPlusRouter, stremioAdultRouter } from "./routes";
 import { logger } from "./lib/logger";
 
 const app: Express = express();
@@ -32,5 +32,6 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/api", router);
 app.use("/stremio", stremioRouter);
 app.use("/stremio-plus", stremioPlusRouter);
+app.use("/stremio-adult", stremioAdultRouter);
 
 export default app;

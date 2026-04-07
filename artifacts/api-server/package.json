@@ -15,6 +15,7 @@
     "base-64": "^1.0.0",
     "bottleneck": "^2.19.5",
     "byte-size": "^7.0.1",
+    "cheerio": "^1.2.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2",
     "delay": "5.0.0",

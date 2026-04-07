@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Copy, Check, ExternalLink, Play, Film, Tv, Heart, Search, Zap, Shield, List, Layers } from "lucide-react";
+import { Copy, Check, ExternalLink, Play, Film, Tv, Heart, Search, Zap, Shield, List, Layers, BookOpen } from "lucide-react";
 
 const ADDONS = [
   {
@@ -46,6 +46,53 @@ const ADDONS = [
         color: "from-pink-500/20 to-rose-500/10",
         accent: "text-pink-400",
         border: "border-pink-500/20",
+      },
+    ],
+  },
+  {
+    id: "adult",
+    path: "/stremio-adult/manifest.json",
+    badge: "Sites Catalog Addon",
+    name: "Adult Sites Catalog",
+    tagline: "Browse IAFD, WayBig & GayDVDEmpire directly in Stremio. Streams via ThePirateBay.",
+    accentFrom: "from-rose-500/20",
+    accentTo: "to-pink-500/10",
+    accentBorder: "border-rose-500/30",
+    accentText: "text-rose-400",
+    accentBg: "bg-rose-600",
+    accentBgLight: "bg-rose-500/15",
+    accentShadow: "shadow-rose-500/20",
+    icon: <BookOpen className="w-5 h-5 fill-white text-white" />,
+    features: [
+      { icon: <Search className="w-5 h-5" />, title: "IAFD Search", desc: "Search the Internet Adult Film Database — the definitive adult film metadata source." },
+      { icon: <Film className="w-5 h-5" />, title: "WayBig Browse", desc: "Browse and search WayBig's curated gay adult content catalog with posters and cast info." },
+      { icon: <Tv className="w-5 h-5" />, title: "GayDVDEmpire", desc: "Browse GayDVDEmpire's full movie catalog, search by title, and get detailed metadata." },
+      { icon: <Zap className="w-5 h-5" />, title: "TPB Streams", desc: "Any movie you open gets TPB torrent streams searched automatically by title." },
+    ],
+    categories: [
+      {
+        label: "IAFD",
+        items: ["Search by title", "Cast & studio info", "Release year & synopsis"],
+        icon: <BookOpen className="w-4 h-4" />,
+        color: "from-rose-500/20 to-pink-500/10",
+        accent: "text-rose-400",
+        border: "border-rose-500/20",
+      },
+      {
+        label: "WayBig",
+        items: ["Latest posts browse", "Full-text search", "Posters & descriptions"],
+        icon: <Film className="w-4 h-4" />,
+        color: "from-pink-500/20 to-fuchsia-500/10",
+        accent: "text-pink-400",
+        border: "border-pink-500/20",
+      },
+      {
+        label: "GayDVDEmpire",
+        items: ["Newest movies", "Search by title", "Cast & studio details"],
+        icon: <Heart className="w-4 h-4" />,
+        color: "from-fuchsia-500/20 to-purple-500/10",
+        accent: "text-fuchsia-400",
+        border: "border-fuchsia-500/20",
       },
     ],
   },
@@ -218,9 +265,10 @@ export default function Home() {
             ThePirateBay for Stremio
           </h1>
           <p className="text-lg text-gray-400 max-w-2xl mb-6">
-            Two complementary addons — install both for the full experience. Browse TPB by category
-            with the <span className="text-orange-400 font-medium">Catalog Addon</span>, and stream
-            any IMDB title via TPB with the <span className="text-purple-400 font-medium">TPB+ Stream Addon</span>.
+            Three complementary addons — install them all for the full experience. Browse TPB by category
+            with the <span className="text-orange-400 font-medium">Catalog Addon</span>, browse adult sites
+            like IAFD and WayBig with the <span className="text-rose-400 font-medium">Adult Sites Catalog</span>,
+            and stream any IMDB title via TPB with <span className="text-purple-400 font-medium">TPB+ Stream</span>.
           </p>
 
           {/* How to install */}
@@ -231,7 +279,7 @@ export default function Home() {
                 "Open Stremio → click the puzzle icon (Addons)",
                 "Choose 'Community addons' → 'Install from URL'",
                 "Paste each manifest URL below and click Install",
-                "Both addons appear in your catalog & stream list immediately",
+                "All three addons appear in your catalog & stream list immediately",
               ].map((step, i) => (
                 <li key={i} className="flex gap-3 items-start text-sm text-gray-400">
                   <span className="w-5 h-5 rounded-full bg-orange-500/20 text-orange-400 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">

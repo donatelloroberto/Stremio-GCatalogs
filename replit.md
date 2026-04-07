@@ -25,10 +25,11 @@ pnpm workspace monorepo using TypeScript. Each package manages its own dependenc
 
 ### API Server (`artifacts/api-server`)
 - Express 5 server on port 8080
-- Registered proxy paths: `/api`, `/stremio`, `/stremio-plus`
+- Registered proxy paths: `/api`, `/stremio`, `/stremio-plus`, `/stremio-adult`
 - `/api/healthz` — health check
 - `/stremio/*` — Catalog addon (browse TPB categories)
 - `/stremio-plus/*` — TPB+ stream addon (IMDB-based stream lookup)
+- `/stremio-adult/*` — Adult Sites Catalog (IAFD, WayBig, GayDVDEmpire + TPB streams)
 
 ## Stremio Addons
 
@@ -69,6 +70,29 @@ Files:
 - `addon.js` — buildAddonInterface(), defineStreamHandler()
 
 Route: `artifacts/api-server/src/routes/stremio-plus.ts`
+
+### Addon 3: Adult Sites Catalog (`/stremio-adult/manifest.json`)
+Source: `artifacts/api-server/src/stremio-adult/`
+
+A **catalog + meta + stream** addon that scrapes adult content sites and provides TPB streams by title.
+- **IAFD** (iafd.com) — search only. Returns film title, year, cast, poster, synopsis.
+- **WayBig** (waybig.com) — browse latest + search. WordPress blog with gay adult content.
+- **GayDVDEmpire** (gaydvdempire.com) — browse newest + search. Adult DVD store catalog.
+- Streams: TPB search by title via apibay.org (cat=500 adult, fallback cat=0 all)
+- Item IDs: `adult:{site}:{base64url(detailPageUrl)}`
+- 30-minute in-memory cache for catalog and meta responses
+- Scrapers use `cheerio` for HTML parsing + `got` for HTTP
+
+Files:
+- `scrapers/iafd.js` — IAFD search + detail page scraper
+- `scrapers/waybig.js` — WayBig browse/search/detail scraper
+- `scrapers/gayempire.js` — GayDVDEmpire browse/search/detail scraper
+- `tpb-search.js` — TPB stream search by title (apibay.org)
+- `addon.js` — buildAddonInterface() with catalog/meta/stream handlers
+
+Route: `artifacts/api-server/src/routes/stremio-adult.ts`
+
+Derived from: https://github.com/donatelloroberto/stremio-plex-agents (Python Plex agents converted to Node.js Stremio scrapers)
 
 ## Key Commands
 
