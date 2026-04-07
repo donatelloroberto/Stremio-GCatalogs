@@ -175,6 +175,9 @@ importers:
       base-64:
         specifier: ^1.0.0
         version: 1.0.0
+      bottleneck:
+        specifier: ^2.19.5
+        version: 2.19.5
       byte-size:
         specifier: ^7.0.1
         version: 7.0.1
@@ -202,6 +205,9 @@ importers:
       is-video:
         specifier: ^1.0.1
         version: 1.0.1
+      lodash:
+        specifier: ^4.18.1
+        version: 4.18.1
       magnet-uri:
         specifier: ^6.2.0
         version: 6.2.0
@@ -214,6 +220,9 @@ importers:
       p-pipe:
         specifier: ^3.1.0
         version: 3.1.0
+      parse-torrent-title:
+        specifier: ^2.1.0
+        version: 2.1.0
       pino:
         specifier: ^9
         version: 9.14.0
@@ -1970,6 +1979,9 @@ packages:
     resolution: {integrity: sha512-oP5VkATKlNwcgvxi0vM0p/D3n2C3EReYVX+DNYs5TjZFn/oQt2j+4sVJtSMr18pdRr8wjTcBl6LoV+FUwzPmNA==}
     engines: {node: '>=18'}
 
+  bottleneck@2.19.5:
+    resolution: {integrity: sha512-VHiNCbI1lKdl44tGrhNfU3lup0Tj/ZBMJB5/2ZbNXRCPuRCO7ed2mgcK4r17y+KB2EfuYuRaVlwNbAeaWGSpbw==}
+
   brace-expansion@2.0.2:
     resolution: {integrity: sha512-Jt0vHyM+jmUBqojB7E1NIYadt0vI0Qxjxd2TErW94wDz+E2LAm5vKMXXwg6ZZBTHPuUlDgQHKXvjGBdfcF1ZDQ==}
 
@@ -2867,6 +2879,9 @@ packages:
   lodash@4.17.23:
     resolution: {integrity: sha512-LgVTMpQtIopCi79SJeDiP0TfWi5CNEc/L/aRdTh3yIvmZXTnheWpKjSZhnvMl8iXbC1tFg9gdHHDMLoV7CnG+w==}
 
+  lodash@4.18.1:
+    resolution: {integrity: sha512-dMInicTPVE8d1e5otfwmmjlxkZoUpiVLwyeTdUsi/Caj/gfzzblBcCE5sRHV/AsjuCmxWrte2TNGSYuCeCq+0Q==}
+
   loose-envify@1.4.0:
     resolution: {integrity: sha512-lyuxPGr/Wfhrlem2CL/UcnUc1zcqKAImBDzukY7Y5F/yQiNdko6+fRLevlw1HgMySw7f611UIY408EtxRSoK3Q==}
     hasBin: true
@@ -3129,6 +3144,10 @@ packages:
   parse-ms@4.0.0:
     resolution: {integrity: sha512-TXfryirbmq34y8QBwgqCVLi+8oA3oWx2eAnSn62ITyEhEYaWRlVZ2DvMM9eZbMs/RfxPu/PK/aBLyGj4IrqMHw==}
     engines: {node: '>=18'}
+
+  parse-torrent-title@2.1.0:
+    resolution: {integrity: sha512-sCpI9qkuAJws8IHFC0VGuVqq+X7A83/GKdjtkXE34a+oAlcSN+EYyxx/I8nN9LHFTjFVUOprHyXuI8Wzhz1irA==}
+    engines: {node: '>=8'}
 
   parse-torrent@7.1.3:
     resolution: {integrity: sha512-to8zT7+o6bVTyP35r2QgG1svuFGMFO1mE6ri1oWHgL9tlgnOtfjmfHmA3mOuP9HTIU/8OiZw0NG5zbyqVLxhvA==}
@@ -5426,6 +5445,8 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  bottleneck@2.19.5: {}
+
   brace-expansion@2.0.2:
     dependencies:
       balanced-match: 1.0.2
@@ -6125,7 +6146,7 @@ snapshots:
       cli-width: 2.2.1
       external-editor: 3.1.0
       figures: 2.0.0
-      lodash: 4.17.23
+      lodash: 4.18.1
       mute-stream: 0.0.7
       run-async: 2.4.1
       rxjs: 6.6.7
@@ -6246,6 +6267,8 @@ snapshots:
       p-locate: 6.0.0
 
   lodash@4.17.23: {}
+
+  lodash@4.18.1: {}
 
   loose-envify@1.4.0:
     dependencies:
@@ -6496,6 +6519,8 @@ snapshots:
   p-pipe@3.1.0: {}
 
   parse-ms@4.0.0: {}
+
+  parse-torrent-title@2.1.0: {}
 
   parse-torrent@7.1.3:
     dependencies:

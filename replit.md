@@ -14,55 +14,98 @@ pnpm workspace monorepo using TypeScript. Each package manages its own dependenc
 - **Database**: PostgreSQL + Drizzle ORM
 - **Validation**: Zod (`zod/v4`), `drizzle-zod`
 - **API codegen**: Orval (from OpenAPI spec)
-- **Build**: esbuild (CJS bundle)
+- **Build**: esbuild (CJS bundle with ESM output)
 
 ## Artifacts
 
-### Stremio PirateBay Addon UI (`artifacts/stremio-piratebay-ui`)
+### Stremio PirateBay UI (`artifacts/stremio-piratebay-ui`)
 - React + Vite frontend served at `/`
-- Landing page for the Stremio addon showing install URL, categories, and how-to guide
+- Landing page showing both addon manifest URLs, install instructions, feature descriptions
+- Orange theme for Catalog Addon, purple theme for TPB+ Stream Addon
 
 ### API Server (`artifacts/api-server`)
-- Express 5 server served at `/api` and `/stremio`
+- Express 5 server on port 8080
+- Registered proxy paths: `/api`, `/stremio`, `/stremio-plus`
 - `/api/healthz` — health check
-- `/stremio/*` — Stremio addon endpoints (manifest, catalog, stream, meta)
+- `/stremio/*` — Catalog addon (browse TPB categories)
+- `/stremio-plus/*` — TPB+ stream addon (IMDB-based stream lookup)
 
-### Stremio Addon Source (`artifacts/api-server/src/stremio/`)
-Built-in unified, fixed, and extended Stremio PirateBay addon (merged from two original projects):
-- **manifest.js** — Defines all catalogs including Gay Porn (TPB cat 506), adult catalogs for movie/series
-- **categories.js** — Full TPB category list including Gay Porn (506), Porn sub-cats (501–505)
-- **search-tpb.js** — apibay.org REST API client; replaces deprecated `request-promise` with `got`, retry + back-off
-- **catalog-handler.js** — Catalog browsing + search; fixed Ramda v0.29 `propEq` arg order, Gay Porn routing
-- **meta-handler.js** — Torrent metadata + video file listing; fixed `url-exist` with HEAD check via `got`, magnet2torrent error handling
-- **stream-handler.js** — Returns `{streams:[]}` shaped responses (original returned bare `[]`); supports file index for multi-file torrents
-- **tools.js** — Base64-encoded ID encode/decode utilities
+## Stremio Addons
+
+### Addon 1: TPB Catalog (`/stremio/manifest.json`)
+Source: `artifacts/api-server/src/stremio/`
+
+A **catalog + stream + meta** addon for browsing and searching TPB by category.
+- Manifests 8 catalogs: Movies, TV, Adult (movies + series) with genre filters
+- Gay Porn (TPB cat 506), all adult sub-categories (500–506, 600)
+- Catalog browsing, full-text search, meta resolution, stream output
+
+Files:
+- `manifest.js` — 8 catalogs including Gay Porn, behaviorHints: { adult: true }
+- `categories.js` — full category list with IDs
+- `search-tpb.js` — apibay.org API client (got, retry, exponential back-off)
+- `catalog-handler.js` — catalog/search handler
+- `meta-handler.js` — magnet2torrent metadata + file listing
+- `stream-handler.js` — `{streams:[]}` response shape, infoHash + fileIdx
+
+Route: `artifacts/api-server/src/routes/stremio.ts`
+
+### Addon 2: TPB+ Stream (`/stremio-plus/manifest.json`)
+Source: `artifacts/api-server/src/stremio-plus/`
+
+A **stream-only** addon (no catalogs). Searches TPB by IMDB ID and title — works with any Stremio catalog (Cinemeta, Trakt, etc.) to provide TPB streams for any movie or series.
+- Searches TPB by IMDB ID, title, and episode title
+- Smart episode matching for series (absolute episode, season bundles)
+- Resolution/source tagging (1080p, 4K, BluRay, WEB-DL)
+- Rate-limited via Bottleneck (max 15 concurrent, queue of 20)
+- In-memory cache for metadata and torrent files (no MongoDB required)
+
+Files:
+- `tpb-api.js` — apibay.org search + file listing via got
+- `metadata.js` — Cinemeta API lookup for title/year/episode counts
+- `filter.js` — title normalization, episode matching logic
+- `stream-info.js` — rich stream titles with quality/size/seeder tags
+- `torrent-files.js` — file listing from TPB f.php API
+- `addon.js` — buildAddonInterface(), defineStreamHandler()
+
+Route: `artifacts/api-server/src/routes/stremio-plus.ts`
 
 ## Key Commands
 
-- `pnpm run typecheck` — full typecheck across all packages
 - `pnpm run build` — typecheck + build all packages
-- `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from OpenAPI spec
-- `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
 - `pnpm --filter @workspace/api-server run dev` — run API server locally
 - `pnpm --filter @workspace/stremio-piratebay-ui run dev` — run UI locally
+- `pnpm vercel:build` — build both for Vercel deployment
 
-## Stremio Addon Fixes (vs. originals)
+## Vercel Deployment
 
-### Addon 1 (piratebay-stremio-addon): REPLACED
-- Used obsolete `stremio-addons` v2 SDK (not maintained)
-- Required MongoDB for caching
-- Movie search used raw IMDB ID instead of title as query
-- No ESM support
+- `vercel.json` at root configures Vercel routing
+- `artifacts/api-server/build-vercel.mjs` — builds Express app as serverless bundle → `api/dist/server.mjs`
+- `api/server.mjs` — Vercel serverless function entry
+- Rewrites: `/api/*`, `/stremio/*`, `/stremio-plus/*` → API serverless function
+- Static files serve the React UI
 
-### Addon 2 (thepiratebay-catalog): FIXED + EXTENDED
-- Fixed Ramda v0.29 `propEq(key, value)` → now using direct predicates
-- Fixed `url-exist` v2 API change (replaced with `got.head`)
+## Bug Fixes vs Original Addons
+
+### stremio-thepiratebay-plus (TPB+)
+- `request` → `got` (request is deprecated/unmaintained)
+- `cheerio` HTML scraper → apibay.org JSON API (more reliable, no proxies needed)
+- `axios` → `got` throughout
+- Removed MongoDB dependency (in-memory LRU cache)
+- Removed `torrent-stream` native binding dependency (uses TPB f.php API instead)
+- Full ESM conversion (compatible with esbuild bundler)
+
+### thepiratebay-catalog
+- Fixed Ramda v0.29 `propEq` argument order
+- Fixed `url-exist` v2 API (replaced with `got.head()`)
 - Fixed `Porn recent` category mapping
-- Added Gay Porn (category 506) to categories list, manifest, and search routing
-- Added full adult sub-category catalog (Porn HD, Porn Movies, Porn DVD, Gay Porn, etc.)
-- Replaced `request-promise` with `got` (maintained, active)
-- Fixed stream handler returning bare `[]` instead of `{streams:[]}` 
-- Added error handling / logging to silent failure points
+- Added Gay Porn (506) + all adult sub-categories
+- Replaced `request-promise` with `got`
+- Fixed stream handler returning `[]` instead of `{streams:[]}`
 - Added `behaviorHints: { adult: true }` to manifest
 
-See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and package details.
+## Jackett Note
+
+Jackett is a C# proxy for 400+ torrent indexers. It's an optional alternative to using apibay.org directly. Not integrated (requires self-hosted Jackett instance), but the API format is:
+- `GET /api/v2.0/indexers/{indexer}/results?apikey=...&Query=...`
+- Can be used as a drop-in replacement for direct TPB API calls
