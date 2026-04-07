@@ -1,0 +1,30 @@
+{
+  "name": "@workspace/stremio-piratebay",
+  "version": "2.0.0",
+  "description": "Stremio Addon for The Pirate Bay – catalog, search, streams, and adult content support.",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js"
+  },
+  "author": "ThanosDi (fixed & extended)",
+  "license": "MIT",
+  "dependencies": {
+    "base-64": "^1.0.0",
+    "byte-size": "^7.0.0",
+    "delay": "^5.0.0",
+    "episode-parser": "^2.0.0",
+    "got": "^11.8.6",
+    "is-video": "^1.0.1",
+    "magnet-uri": "^6.1.0",
+    "magnet2torrent-js": "^1.4.0",
+    "p-map": "^4.0.0",
+    "p-pipe": "^3.1.0",
+    "ramda": "^0.29.1",
+    "stremio-addon-sdk": "^1.6.10",
+    "video-name-parser": "^1.4.6"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.0"
+  }
+}

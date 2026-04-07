@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "Stremio PirateBay Addon"
+version = "1.0.0"
+id = "artifacts/stremio-piratebay-ui"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 25655
+
+[services.development]
+run = "pnpm --filter @workspace/stremio-piratebay-ui run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/stremio-piratebay-ui", "run", "build" ]
+publicDir = "artifacts/stremio-piratebay-ui/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "25655"
+BASE_PATH = "/"

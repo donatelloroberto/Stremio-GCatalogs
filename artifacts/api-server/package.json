@@ -12,12 +12,25 @@
   "dependencies": {
     "@workspace/api-zod": "workspace:*",
     "@workspace/db": "workspace:*",
+    "base-64": "^1.0.0",
+    "byte-size": "^7.0.1",
     "cookie-parser": "^1.4.7",
     "cors": "^2",
+    "delay": "5.0.0",
     "drizzle-orm": "catalog:",
+    "episode-parser": "^2.0.2",
     "express": "^5",
+    "got": "^11.8.6",
+    "is-video": "^1.0.1",
+    "magnet-uri": "^6.2.0",
+    "magnet2torrent-js": "^1.4.0",
+    "p-map": "^4.0.0",
+    "p-pipe": "^3.1.0",
     "pino": "^9",
-    "pino-http": "^10"
+    "pino-http": "^10",
+    "ramda": "^0.29.1",
+    "stremio-addon-sdk": "^1.6.10",
+    "video-name-parser": "^1.4.7"
   },
   "devDependencies": {
     "@types/cookie-parser": "^1.4.10",
