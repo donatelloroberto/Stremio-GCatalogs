@@ -4,13 +4,13 @@
  * Provides catalog browsing and search for:
  *  - IAFD (Internet Adult Film Database) — search only
  *  - WayBig (gay adult content blog) — browse + search
- *  - GayDVDEmpire — browse + search
+ *  - gay-movie.org (gay adult film blog) — browse + search
  *
  * Streams come from TPB search by title.
  */
 import { searchIAFD, getIAFDMeta } from './scrapers/iafd.js';
 import { browseWayBig, searchWayBig, getWayBigMeta } from './scrapers/waybig.js';
-import { browseGayEmpire, searchGayEmpire, getGayEmpireMeta } from './scrapers/gayempire.js';
+import { browseGayMovie, searchGayMovie, getGayMovieMeta } from './scrapers/gaymovie.js';
 import { streamsByTitle } from './tpb-search.js';
 
 const CACHE = new Map();
@@ -60,11 +60,11 @@ async function handleCatalog({ type, id, extra }) {
             } else {
                 metas = await cached(`waybig:page:${page}`, () => browseWayBig(page));
             }
-        } else if (id === 'adult-gayempire') {
+        } else if (id === 'adult-gaymovie') {
             if (search) {
-                metas = await cached(`gde:search:${search}`, () => searchGayEmpire(search));
+                metas = await cached(`gaymovie:search:${search}`, () => searchGayMovie(search));
             } else {
-                metas = await cached(`gde:page:${page}`, () => browseGayEmpire(page));
+                metas = await cached(`gaymovie:page:${page}`, () => browseGayMovie(page));
             }
         }
     } catch (err) {
@@ -87,7 +87,7 @@ async function handleMeta({ type, id }) {
         let detail = {};
         if (site === 'iafd') detail = await cached(`meta:${id}`, () => getIAFDMeta(url));
         else if (site === 'waybig') detail = await cached(`meta:${id}`, () => getWayBigMeta(url));
-        else if (site === 'gde') detail = await cached(`meta:${id}`, () => getGayEmpireMeta(url));
+        else if (site === 'gaymovie') detail = await cached(`meta:${id}`, () => getGayMovieMeta(url));
 
         return {
             meta: {
@@ -119,19 +119,18 @@ async function handleStream({ type, id }) {
     if (!parsed) return { streams: [] };
 
     try {
-        // We need the title — fetch from cache or meta
         const metaKey = `meta:${id}`;
         const cached_meta = CACHE.get(metaKey)?.val;
         let title = cached_meta?.title;
 
         if (!title) {
-            // Try to extract title from URL path
+            // Decode title from URL path as fallback
             const { url } = parsed;
-            const urlTitle = decodeURIComponent(url.split('/').filter(Boolean).pop() || '')
+            const slug = decodeURIComponent(url.split('/').filter(Boolean).pop() || '')
                 .replace(/[-_]/g, ' ')
                 .replace(/\.\w+$/, '')
                 .trim();
-            title = urlTitle || 'adult film';
+            title = slug || 'adult film';
         }
 
         const streams = await streamsByTitle(title);
@@ -147,9 +146,9 @@ async function handleStream({ type, id }) {
 export function buildAddonInterface(addonBuilder) {
     const manifest = {
         id: 'com.stremio.adult-sites-catalog',
-        version: '1.0.0',
+        version: '1.1.0',
         name: 'Adult Sites Catalog',
-        description: 'Browse and search IAFD, WayBig, and GayDVDEmpire directly in Stremio. Streams provided by ThePirateBay.',
+        description: 'Browse and search IAFD, WayBig, and gay-movie.org directly in Stremio. Streams provided by ThePirateBay.',
         catalogs: [
             {
                 type: 'movie',
@@ -170,8 +169,8 @@ export function buildAddonInterface(addonBuilder) {
             },
             {
                 type: 'movie',
-                id: 'adult-gayempire',
-                name: 'GayDVDEmpire',
+                id: 'adult-gaymovie',
+                name: 'Gay Movie',
                 extra: [
                     { name: 'search', isRequired: false },
                     { name: 'skip', isRequired: false },

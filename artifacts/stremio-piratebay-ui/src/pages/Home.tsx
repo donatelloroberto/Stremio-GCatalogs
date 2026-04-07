@@ -66,7 +66,7 @@ const ADDONS = [
     features: [
       { icon: <Search className="w-5 h-5" />, title: "IAFD Search", desc: "Search the Internet Adult Film Database — the definitive adult film metadata source." },
       { icon: <Film className="w-5 h-5" />, title: "WayBig Browse", desc: "Browse and search WayBig's curated gay adult content catalog with posters and cast info." },
-      { icon: <Tv className="w-5 h-5" />, title: "GayDVDEmpire", desc: "Browse GayDVDEmpire's full movie catalog, search by title, and get detailed metadata." },
+      { icon: <Tv className="w-5 h-5" />, title: "gay-movie.org", desc: "Browse and search gay-movie.org's film catalog with posters, descriptions, and cast info." },
       { icon: <Zap className="w-5 h-5" />, title: "TPB Streams", desc: "Any movie you open gets TPB torrent streams searched automatically by title." },
     ],
     categories: [
@@ -87,8 +87,8 @@ const ADDONS = [
         border: "border-pink-500/20",
       },
       {
-        label: "GayDVDEmpire",
-        items: ["Newest movies", "Search by title", "Cast & studio details"],
+        label: "gay-movie.org",
+        items: ["Newest films browse", "Search by title", "Posters & cast tags"],
         icon: <Heart className="w-4 h-4" />,
         color: "from-fuchsia-500/20 to-purple-500/10",
         accent: "text-fuchsia-400",
@@ -267,7 +267,7 @@ export default function Home() {
           <p className="text-lg text-gray-400 max-w-2xl mb-6">
             Three complementary addons — install them all for the full experience. Browse TPB by category
             with the <span className="text-orange-400 font-medium">Catalog Addon</span>, browse adult sites
-            like IAFD and WayBig with the <span className="text-rose-400 font-medium">Adult Sites Catalog</span>,
+            like IAFD, WayBig & gay-movie.org with the <span className="text-rose-400 font-medium">Adult Sites Catalog</span>,
             and stream any IMDB title via TPB with <span className="text-purple-400 font-medium">TPB+ Stream</span>.
           </p>
 

@@ -1,16 +1,22 @@
 /**
  * IAFD (Internet Adult Film Database) scraper
  * Search: https://www.iafd.com/results.asp?searchtype=comprehensive&searchstring={query}
- * Performer search: https://www.iafd.com/results.asp?searchtype=comprehensive&searchstring={name}&action=&Search=+Go+
- * Title page: https://www.iafd.com/title.rme/{slug}
+ * Detail: https://www.iafd.com/title.rme/id={UUID}
+ *
+ * HTML structure (as observed):
+ *   <tr class="co">
+ *     <td><a href="https://www.iafd.com/title.rme/id=UUID">Title</a></td>
+ *     <td>2024</td>
+ *     <td>Studio</td>
+ *     ...
+ *   </tr>
  */
 import got from 'got';
 import * as cheerio from 'cheerio';
 
 const BASE = 'https://www.iafd.com';
 const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0 Safari/537.36';
-
-const REFERER = `${BASE}/title.rme/title=sample/year=2020/sample.htm`;
+const REFERER = `${BASE}/`;
 
 async function fetchHtml(url) {
     const res = await got(url, {
@@ -18,104 +24,93 @@ async function fetchHtml(url) {
         timeout: { request: 15000 },
         followRedirect: true,
     });
-    return cheerio.load(res.body);
+    return { body: res.body, $: cheerio.load(res.body) };
 }
 
 export async function searchIAFD(query) {
     const q = encodeURIComponent(query.slice(0, 72));
     const url = `${BASE}/results.asp?searchtype=comprehensive&searchstring=${q}`;
-    const $ = await fetchHtml(url);
+    const { body } = await fetchHtml(url);
 
     const results = [];
 
-    // Films section
-    $('table#tblFtr tr, table.t-grid tbody tr').each((_i, el) => {
-        try {
-            const $el = $(el);
-            const linkEl = $el.find('td:nth-child(1) a').first();
-            const title = linkEl.text().trim();
-            const href = linkEl.attr('href') || '';
-            if (!title || !href) return;
+    // The table rows have format:
+    // <tr class="co"><td><a href="https://www.iafd.com/title.rme/id=UUID">Title</a></td><td>YEAR</td><td>Studio</td>...
+    const rowPattern = /<tr[^>]*class="co[^"]*"[^>]*>\s*<td[^>]*>\s*<a\s+href="(https:\/\/www\.iafd\.com\/title\.rme\/id=[^"]+)"[^>]*>([^<]+)<\/a>\s*<\/td>\s*<td[^>]*>(\d{4})?<\/td>\s*<td[^>]*>([^<]*)<\/td>/gi;
 
-            const fullUrl = href.startsWith('http') ? href : BASE + href;
-            const year = $el.find('td:nth-child(2)').text().trim();
-            const poster = $el.find('img').first().attr('src') || '';
+    let match;
+    while ((match = rowPattern.exec(body)) !== null) {
+        const filmUrl = match[1];
+        const title = match[2].trim();
+        const year = match[3] || '';
+        const studio = match[4]?.trim() || '';
 
-            const slug = Buffer.from(fullUrl).toString('base64url');
-            results.push({
-                id: `adult:iafd:${slug}`,
-                type: 'movie',
-                name: title,
-                releaseInfo: year || undefined,
-                poster: poster && !poster.includes('nophoto') ? (poster.startsWith('http') ? poster : BASE + poster) : undefined,
-                description: `IAFD — ${year}`,
-            });
-        } catch {}
-    });
+        if (!title || !filmUrl) continue;
 
-    // Fallback: look for film links in any table rows
-    if (results.length === 0) {
-        $('a[href*="/title.rme/"]').each((_i, el) => {
-            try {
-                const $el = $(el);
-                const title = $el.text().trim();
-                const href = $el.attr('href') || '';
-                if (!title || !href) return;
-
-                const fullUrl = href.startsWith('http') ? href : BASE + href;
-                const slug = Buffer.from(fullUrl).toString('base64url');
-                results.push({
-                    id: `adult:iafd:${slug}`,
-                    type: 'movie',
-                    name: title,
-                    description: 'IAFD',
-                });
-            } catch {}
+        const slug = Buffer.from(filmUrl).toString('base64url');
+        results.push({
+            id: `adult:iafd:${slug}`,
+            type: 'movie',
+            name: title,
+            releaseInfo: year || undefined,
+            // IAFD search doesn't have posters in the results table
+            // We use a placeholder until the detail page is fetched
+            description: studio ? `${studio}${year ? ` (${year})` : ''}` : (year || 'IAFD'),
         });
+
+        if (results.length >= 25) break;
     }
 
-    return results.slice(0, 25);
+    return results;
 }
 
 export async function getIAFDMeta(url) {
-    const $ = await fetchHtml(url);
+    const { $, body } = await fetchHtml(url);
 
-    const title = $('h1.centerheader').text().trim() || $('h1').first().text().trim();
-    const year = $('.bioheading:contains("Year")').next('.biodata').text().trim()
-        || $('p.biodata').first().text().match(/\d{4}/)?.[0] || '';
+    const title = $('h1.centerheader').first().text().trim()
+        || $('h1').first().text().trim()
+        || 'Unknown';
 
-    const poster = $('#headshot img, .posbanner img').first().attr('src') || '';
-    const fullPoster = poster && !poster.includes('nophoto')
-        ? (poster.startsWith('http') ? poster : BASE + poster)
+    // Poster: IAFD uses a boxshot image for the film
+    const posterEl = $('img.boxshot, #headshot img, .posbanner img, img[src*="/graphics/filmimages/"]').first();
+    const posterSrc = posterEl.attr('src') || '';
+    const fullPoster = posterSrc
+        ? (posterSrc.startsWith('http') ? posterSrc : BASE + posterSrc)
         : undefined;
 
-    const description = $('p.bioheading:contains("Synopsis")').next('p').text().trim()
-        || $('div.bioheading:contains("Synopsis")').next().text().trim() || '';
+    // If we have a boxshot with nophoto, discard it
+    const poster = (fullPoster && !fullPoster.includes('nophoto')) ? fullPoster : undefined;
 
-    const studio = $('p.bioheading:contains("Studio")').next('.biodata').text().trim()
-        || $('.bioheading:contains("Studio")').next().text().trim() || '';
+    // Year
+    const year = $('p.bioheading:contains("Year"), .bioheading:contains("Year")').next('.biodata').text().trim()
+        || body.match(/Released.*?(\d{4})/)?.[1]
+        || $('th:contains("Year")').next('td').text().trim()
+        || '';
+
+    // Synopsis
+    const description = $('p.biodata:contains("Synopsis")').text().trim()
+        || $('p.bioheading:contains("Synopsis"), .bioheading:contains("Synopsis")').next('p, .biodata').text().trim()
+        || '';
+
+    const studio = $('p.bioheading:contains("Studio"), .bioheading:contains("Studio")').next('.biodata').text().trim()
+        || $('a[href*="/studio.rme/"]').first().text().trim()
+        || '';
 
     const cast = [];
-    $('div.performer a, p.bioheading:contains("Cast")').next().find('a').each((_i, el) => {
-        const name = $(el).text().trim();
-        if (name) cast.push({ name });
-    });
-
-    // Also look for cast in the page's performer links
     $('a[href*="/person.rme/"]').each((_i, el) => {
         const name = $(el).text().trim();
         if (name && !cast.find(c => c.name === name)) cast.push({ name });
     });
 
     const genres = [];
-    $('.bioheading:contains("Genre")').next('.biodata').find('a').each((_i, el) => {
+    $('a[href*="/results.asp?searchtype=PerformerType"]').each((_i, el) => {
         genres.push($(el).text().trim());
     });
 
     return {
         title,
         year: year || undefined,
-        poster: fullPoster,
+        poster,
         description: description || (studio ? `Studio: ${studio}` : undefined),
         cast: cast.slice(0, 20),
         genres: genres.length ? genres : undefined,
