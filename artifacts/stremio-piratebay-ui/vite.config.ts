@@ -68,6 +68,24 @@ export default defineConfig({
       strict: true,
       deny: ["**/.*"],
     },
+    proxy: {
+      "/stremio": {
+        target: "http://localhost:8080",
+        changeOrigin: true,
+      },
+      "/stremio-plus": {
+        target: "http://localhost:8080",
+        changeOrigin: true,
+      },
+      "/stremio-adult": {
+        target: "http://localhost:8080",
+        changeOrigin: true,
+      },
+      "/api": {
+        target: "http://localhost:8080",
+        changeOrigin: true,
+      },
+    },
   },
   preview: {
     port,
